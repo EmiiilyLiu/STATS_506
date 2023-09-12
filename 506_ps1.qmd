@@ -2,10 +2,12 @@
 title: "506 Problem Set 1"
 author: "Xiaohan Liu"
 format: 
-  html:
+  pdf:
     toc: true
 editor: visual
 ---
+
+GitHub repository: https://github.com/EmiiilyLiu/STATS_506
 
 ## Problem 1
 
@@ -204,7 +206,8 @@ findRootPower(94143178827)
 ```{r eval=FALSE}
 # Function to determine the name of a poker hand
 get_poker_hand_name <- function(suits, ranks) {
-  if (!is.vector(suits) || !is.vector(ranks) || length(suits) != 5 || length(ranks) != 5) {
+  if (!is.vector(suits) || !is.vector(ranks) 
+      || length(suits) != 5 || length(ranks) != 5) {
     stop("Input vectors must have exactly 5 elements.")
   }
   
@@ -263,7 +266,8 @@ deal_poker_round <- function(num_players) {
   
   # Define the deck of cards
   suits <- c("Hearts", "Diamonds", "Clubs", "Spades")
-  ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace")
+  ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10",
+             "Jack", "Queen", "King", "Ace")
   
   # Create a deck by combining suits and ranks
   deck <- expand.grid(Suit = suits, Rank = ranks)
@@ -275,7 +279,8 @@ deal_poker_round <- function(num_players) {
   # Deal 5 cards to each player
   player_hands <- matrix("", nrow = num_players, ncol = 5)
   for (i in 1:num_players) {
-    player_hands[i, ] <- paste(shuffled_deck[((i - 1) * 5 + 1):(i * 5), ], collapse = " of ")
+    player_hands[i, ] <- paste(shuffled_deck[((i - 1) * 5 + 1):(i * 5), ],
+                               collapse = " of ")
   }
   
   # Determine and display the name of each player's hand
@@ -286,7 +291,9 @@ deal_poker_round <- function(num_players) {
   
   cat("Player Hands:\n")
   for (i in 1:num_players) {
-    cat(sprintf("Player %d: %s - %s\n", i, paste(player_hands[i, ], collapse = ", "), hand_names[i]))
+    cat(sprintf("Player %d: %s - %s\n", i, 
+                paste(player_hands[i, ], collapse = ", "), 
+                hand_names[i]))
   }
 }
 
@@ -317,21 +324,25 @@ ranks <- c("Ace", "King", "Queen", "Jack", "10")
 
 > Error in get_poker_hand_name(suits = shuffled_deck\[((i - 1) \* 5 + 1):(i \* : Input vectors must have exactly 5 elements.
 
-The first function, (I delete the comments given by ChatGPT, and put the explanation as the fixed part in comments)
+The first function, (I delete the comments given by ChatGPT, and put the explanation of the fixed part in comments)
 
 ```{r}
 get_poker_hand_name <- function(suits, ranks) {
-  if (!is.vector(suits) || !is.vector(ranks) || length(suits) != 5 || length(ranks) != 5) {
+  if (!is.vector(suits) || !is.vector(ranks) || 
+      length(suits) != 5 || length(ranks) != 5) {
     stop("Input vectors must have exactly 5 elements.")
   }
   
-### Since some functions used below only accept numeric input, but there exists non-numeric input, so I use *match* function to transfer into numeric values
+## Since some functions used below only accept numeric input, 
+## but there exists non-numeric input, so I use *match* function 
+## to transfer into numeric values
   rank_values <- match(ranks, c("2", "3", "4", "5", "6", "7", "8", "9", "10", 
                                 "Jack", "Queen", "King", "Ace"))
   
   sorted_ranks <- sort(rank_values, decreasing = TRUE)
   
-### According to the website, the code given by ChatGPT misses Royal Flush, so I add it here
+## According to the website, the code given by ChatGPT 
+## misses Royal Flush, so I add it here
   if (all(sorted_ranks == c(13, 12, 11, 10, 9)) && length(unique(suits)) == 1) {
     return("Royal Flush")
   }
@@ -394,7 +405,8 @@ deal_poker_round <- function(num_players) {
   }
  
   suits <- c("Hearts", "Diamonds", "Clubs", "Spades")
-  ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace")
+  ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", 
+             "Jack", "Queen", "King", "Ace")
   
   deck <- expand.grid(Suit = suits, Rank = ranks)
   
@@ -403,7 +415,8 @@ deal_poker_round <- function(num_players) {
 
   player_hands <- matrix("", nrow = num_players, ncol = 5)
   for (i in 1:num_players) {
-    #player_hands[i, ] <- paste(shuffled_deck[((i - 1) * 5 + 1):(i * 5), ], collapse = " of ")
+    #player_hands[i, ] <- paste(shuffled_deck[((i - 1) * 5 + 1):(i * 5), ]
+    #, collapse = " of ")
     player_hands[i, ] <- apply(shuffled_deck[((i - 1) * 5 + 1):(i * 5),], 1,
                                function(x)paste(x,collapse = " of "))
   }
@@ -431,7 +444,8 @@ From the definition of *hand_names*, we know that the expected output of *player
 ## expected output
 num_players <- 4
 suits <- c("Hearts", "Diamonds", "Clubs", "Spades")
-ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace")
+ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", 
+           "Jack", "Queen", "King", "Ace")
   
 deck <- expand.grid(Suit = suits, Rank = ranks)
   
@@ -455,7 +469,8 @@ But the code given by ChatGPT cannot get the expected output (see below), which 
 ## Output of player_hands given by ChatGPT
 num_players <- 4
 suits <- c("Hearts", "Diamonds", "Clubs", "Spades")
-ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace")
+ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", 
+           "Jack", "Queen", "King", "Ace")
   
 deck <- expand.grid(Suit = suits, Rank = ranks)
   
@@ -464,7 +479,8 @@ shuffled_deck <- deck[sample(nrow(deck)), ]
 
 player_hands <- matrix("", nrow = num_players, ncol = 5)
 for (i in 1:num_players) {
-  player_hands[i, ] <- paste(shuffled_deck[((i - 1) * 5 + 1):(i * 5), ], collapse = " of ")
+  player_hands[i, ] <- paste(shuffled_deck[((i - 1) * 5 + 1):(i * 5), ],
+                             collapse = " of ")
   
 }
 
@@ -477,64 +493,90 @@ player_hands
 # Define a function named get_poker_hand_name with two inputs: suits and ranks
 get_poker_hand_name <- function(suits, ranks) {
   
-  # Check if the inputs are vectors and if their lengths are 5. Otherwise, raise an error
-  if (!is.vector(suits) || !is.vector(ranks) || length(suits) != 5 || length(ranks) != 5) {
+  # Check if the inputs are vectors and if their lengths are 5. 
+  # Otherwise, raise an error
+  if (!is.vector(suits) || !is.vector(ranks) || 
+      length(suits) != 5 || length(ranks) != 5) {
     stop("Invalid input")
   }
   
-  # Since the rank in poker games are not all numerical values, so use match function to    convert into numerical values$
+  # Since the rank in poker games are not all numerical values, 
+  # so use match function to convert into numerical values$
   rank_values <- match(ranks, c("2", "3", "4", "5", "6", "7", "8", "9", "10", 
                                 "Jack", "Queen", "King", "Ace"))
   
   # Sort ranks in descending order
   sorted_ranks <- sort(rank_values, decreasing = TRUE)
   
-  # Check if inputs satisfy Royal Flush: ranks after *match* equal to 14, 13, 12, 11, 10,   corresponding to (Ace, King, Queen, Jack, 10) respectively, and they have the same suit
+  # Check if inputs satisfy Royal Flush: 
+  # ranks after *match* equal to 14, 13, 12, 11, 10,  
+  # corresponding to (Ace, King, Queen, Jack, 10) respectively, 
+  # and they have the same suit
   if (all(sorted_ranks == c(13, 12, 11, 10, 9)) && length(unique(suits)) == 1) {
     return("Royal Flush")
   }
   
-  # If Royal Flush is not satisfied, check if inputs satisfy Straight Flush: All of the     neighboring values in *sorted_ranks* are different by 1 (there is a error, since      we order ranks in descending direction, so it should be diff(sorted_ranks) == -1),    and they have the same suit
+  # If Royal Flush is not satisfied, 
+  # check if inputs satisfy Straight Flush: 
+  # All of the neighboring values in *sorted_ranks* 
+  # are different by 1 (there is a error, since we order ranks 
+  # in descending direction, 
+  # so it should be diff(sorted_ranks) == -1),
+  # and they have the same suit
   if (all(diff(sorted_ranks) == 1) && length(unique(suits)) == 1) {
     return("Straight Flush")
   }
   
-  # If the above are both unsatisfied, check if inputs satisfy Four of a kind: there are    four cards with the same rank
+  # If the above are both unsatisfied, 
+  # check if inputs satisfy Four of a kind: 
+  # there are four cards with the same rank
   if (any(table(sorted_ranks) == 4)) {
     return("Four of a Kind")
   }
   
-  # If the above are all unsatisfied, check if inputs satisfy Full House: any three of the five have the same rank, and the remaining two have the same rank of another kind
+  # If the above are all unsatisfied, 
+  # check if inputs satisfy Full House: 
+  # any three of the five have the same rank, 
+  # and the remaining two have the same rank of another kind
   if (all(table(ranks) %in% c(2, 3))) {
     return("Full House")
   }
  
-  # If the above are all unsatisfied, check if inputs satisfy Flush: 5 cards have the same  suit
+  # If the above are all unsatisfied, 
+  # check if inputs satisfy Flush: 5 cards have the same suit
   if (length(unique(suits)) == 1) {
     return("Flush")
   }
   
-  # If the above are all unsatisfied, check if inputs satisfy Flush: 5 cards have the same  suit
+  # If the above are all unsatisfied, 
+  # check if inputs satisfy Flush: 5 cards have the same suit
   if (all(diff(sorted_ranks) == 1)) {
     return("Straight")
   }
  
-  # If the above are all unsatisfied, check if inputs satisfy Three of a Kind: any three of the five have the same rank
+  # If the above are all unsatisfied, 
+  # check if inputs satisfy Three of a Kind: 
+  # any three of the five have the same rank
   if (any(table(ranks) == 3)) {
     return("Three of a Kind")
   }
   
-  # If the above are all unsatisfied, check if inputs satisfy Two Pair: two of the five     cards have the same rank, other two of the remaining three cards have the same rank.
+  # If the above are all unsatisfied, 
+  # check if inputs satisfy Two Pair: 
+  # two of the five cards have the same rank, 
+  # other two of the remaining three cards have the same rank.
   if (sum(table(ranks) == 2) == 4) {
     return("Two Pair")
   }
  
-  # If the above are all unsatisfied, check if inputs satisfy One Pair: two of the five     cards have the same rank
+  # If the above are all unsatisfied, 
+  # check if inputs satisfy One Pair: 
+  # two of the five cards have the same rank
   if (any(table(ranks) == 2)) {
     return("One Pair")
   }
   
-  ## None conditions are satisfied, just return High Card
+  # None conditions are satisfied, just return High Card
   return("High Card")
 }
 ```
@@ -542,42 +584,58 @@ get_poker_hand_name <- function(suits, ranks) {
 ```{r}
 # Define a function named deal_poker_round with a input: num_players
 deal_poker_round <- function(num_players) {
-  # The num_player only accept value larger or equal to 2 and smaller or equal to 8, otherwise, raise an error message
+  # The num_player only accept value larger or equal to 2 and smaller or equal to 8, 
+  # otherwise, raise an error message
   if (num_players < 2 || num_players > 8) {
     stop("Number of players must be between 2 and 8.")
   }
  
-  # Create a vector variable named suits, containing all kinds of suits in a Poker game
+  # Create a vector variable named suits, 
+  # containing all kinds of suits in a Poker game
   suits <- c("Hearts", "Diamonds", "Clubs", "Spades")
   
-  # Create a vector variable named ranks, containing all kinds of ranks in a Poker game
-  ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace")
+  # Create a vector variable named ranks, 
+  # containing all kinds of ranks in a Poker game
+  ranks <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", 
+             "Jack", "Queen", "King", "Ace")
   
-  # Create a data frame named deck, containing all combinations (52*2) of suit and rank 
+  # Create a data frame named deck, 
+  # containing all combinations (52*2) of suit and rank 
   deck <- expand.grid(Suit = suits, Rank = ranks)
   
   # Set a seed in order for the random process reproducible
   set.seed(123)
   
-  # Random sampling with frequency equal to the number of rows of deck without replacement, in order to shuffle the above combinations randomly
+  # Random sampling with frequency equal to the number of rows of deck 
+  # without replacement, in order to shuffle the above combinations randomly
   shuffled_deck <- deck[sample(nrow(deck)), ]
 
-  # Create a matrix, whose elements are all empty strings, named 'player_hands', with the number of rows equal to num_players and 5 columns (to store the 5 cards for each player).
+  # Create a matrix, whose elements are all empty strings, 
+  # named 'player_hands', with the number of rows equal to num_players 
+  # and 5 columns (to store the 5 cards for each player).
   player_hands <- matrix("", nrow = num_players, ncol = 5)
   
   # Deal cards to each player using a for loop
   for (i in 1:num_players) {
     
-    # In ith iteration, take 5 rows from shuffled_deck (shuffled_deck[((i - 1) * 5 + 1):(i * 5),]) and distribute to the i-th player. 
-    # By apply function with a custom function, format each card with the form "(rank) of (suit)". Store the strings in the i-th row of player_hands
+    # In ith iteration, take 5 rows from shuffled_deck 
+    # (shuffled_deck[((i - 1) * 5 + 1):(i * 5),]) 
+    # and distribute to the i-th player. 
+    # By apply function with a custom function, 
+    # format each card with the form "(rank) of (suit)". 
+    # Store the strings in the i-th row of player_hands
     player_hands[i, ] <- apply(shuffled_deck[((i - 1) * 5 + 1):(i * 5),], 1,
                                function(x)paste(x,collapse = " of "))
   }
   
-  # Using sapply function to iterate every player and get the hand of each player by calling function get_poker_hand_name. Store the result in a vector hand_names
+  # Using sapply function to iterate every player 
+  # and get the hand of each player by calling function get_poker_hand_name.
+  # Store the result in a vector hand_names
   hand_names <- sapply(1:num_players, function(i) {
-    get_poker_hand_name(suits = as.vector(shuffled_deck[((i - 1) * 5 + 1):(i * 5), "Suit"]),
-                        ranks = as.vector(shuffled_deck[((i - 1) * 5 + 1):(i * 5), "Rank"]))
+    get_poker_hand_name(suits = as.vector(shuffled_deck[((i - 1) * 5 + 1)
+                                                        :(i * 5), "Suit"]),
+                        ranks = as.vector(shuffled_deck[((i - 1) * 5 + 1)
+                                                        :(i * 5), "Rank"]))
   })
   
   # Print the result
@@ -657,7 +715,8 @@ Fix:
 
 ```{r}
 get_poker_hand_name <- function(suits, ranks) {
-  if (!is.vector(suits) || !is.vector(ranks) || length(suits) != 5 || length(ranks) != 5) {
+  if (!is.vector(suits) || !is.vector(ranks) || 
+      length(suits) != 5 || length(ranks) != 5) {
     stop("Input vectors must have exactly 5 elements.")
   }
   
