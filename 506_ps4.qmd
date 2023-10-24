@@ -152,7 +152,7 @@ get_temp("November", 1999, data =nnmaps, celsius = TRUE,
 ```
 
 ## Problem 3
-SAS output link: https://github.com/EmiiilyLiu/STATS_506
+SAS output link: https://github.com/EmiiilyLiu/STATS_506, in file HW4_Q3-results.html
 
 ``` SAS
 /* import csv file */
