@@ -152,6 +152,8 @@ get_temp("November", 1999, data =nnmaps, celsius = TRUE,
 ```
 
 ## Problem 3
+SAS output link: https://github.com/EmiiilyLiu/STATS_506
+
 ``` SAS
 /* import csv file */
 PROC IMPORT DATAFILE='/home/u63651235/sasuser.v94/recs2020_public_v5.csv'
