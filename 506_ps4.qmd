@@ -483,7 +483,7 @@ Note: _cons estimates baseline odds.
 . 
 ```
 
-All of the $p-value$ of all categories of variable *ND2_NUM* larger than $0.05$, meaning statistically insignificant. Therefore, we have no enough evidence to conclude that long-term concerns about climate change impact current day concerns about financial stability, controlling other predictors.
+All of the $p-value$ of all categories of variable *ND2_num* larger than $0.05$, meaning statistically insignificant. Therefore, we have no enough evidence to conclude that long-term concerns about climate change impact current day concerns about financial stability, controlling other predictors.
 
 ### (g)
 ```stata
