@@ -1,0 +1,378 @@
+---
+title: "506 Problem Set 5"
+author: "Xiaohan Liu"
+format: 
+  pdf:
+    toc: true
+editor: visual
+---
+
+GitHub repository: https://github.com/EmiiilyLiu/STATS_506
+
+```{r}
+setwd("F:/Desktop/STATS 506/STATS_506")
+```
+
+## Problem 1
+### (a)
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+nnmaps <- read.csv("chicago-nmmaps.csv")
+
+## Convert temperature from Fahrenheit to Celsius
+nnmaps$temp_celsius <- (nnmaps$temp - 32) * 5 / 9
+
+## Define the order of the seasons
+nnmaps$season <- factor(nnmaps$season,
+                        levels = c("Winter", "Spring",
+                                   "Summer", "Autumn"))
+
+## Calculate monthly average temperature
+monthly_avg_temp <- nnmaps %>%
+  group_by(month, season) %>%
+  summarise(mean_temp = mean(temp_celsius, na.rm = TRUE), .groups = 'drop') %>%
+  ungroup() %>%
+  arrange(match(month, month.abb))
+
+## Plotting
+## x-axis: month & y-axis: average monthly temperature in celsius
+## A line connecting the points within each season 
+## Color the lines and points by season
+ggplot(monthly_avg_temp, aes(x = month, y = mean_temp, 
+                             group = season, color = season)) +
+  geom_point() +
+  geom_line() +
+  scale_x_discrete(limits = month.abb) +
+  labs(title = "Average Monthly Temperature by Season",
+       x = "Month",
+       y = "Average Temperature (°C)",
+       color = "Season") +
+  theme_minimal()
+```
+
+### (b)
+```{r}
+## Calculate monthly average temperature, O3, PM10, and dewpoint
+monthly_avg_data <- nnmaps %>%
+  group_by(season, month) %>%
+  summarize(mean_temp = mean(temp_celsius, na.rm = TRUE),
+            mean_o3 = mean(o3, na.rm = TRUE),
+            mean_pm10 = mean(pm10, na.rm = TRUE),
+            mean_dewpoint = mean(dewpoint, na.rm = TRUE),
+            .groups = 'drop') %>%
+  ungroup() %>%
+  arrange(match(month, month.abb))
+
+## Define colors for the seasons
+season_colors <- c("Winter" = "#F8766D", "Spring" = "#7CAE00", 
+                   "Summer" = "#00BFC4", "Autumn" = "#C77CFF")
+
+## Define linetypes for the variables
+variable_linetypes <- c("Temperature" = "solid", "O3" = "longdash", 
+                        "PM10" = "dotted", "Dewpoint" = "dotdash")
+
+## Define shapes for the variables
+variable_shapes <- c("Temperature" = 15, "O3" = 9, "PM10" = 13, "Dewpoint" = 16)
+
+## Create a new variable to map linetypes and shapes to variables
+monthly_avg <- monthly_avg_data %>%
+  pivot_longer(cols = starts_with("mean_"), 
+               names_to = "variable", values_to = "value") %>%
+  mutate(variable = factor(variable, levels = c("mean_temp", 
+                                                "mean_o3", 
+                                                "mean_pm10", 
+                                                "mean_dewpoint"),
+                           labels = c("Temperature", "O3", "PM10", "Dewpoint")))
+
+## Plot using the long format data
+final_plot <- ggplot(monthly_avg, aes(x = month, y = value, 
+                                      group = interaction(season, variable))) +
+  geom_point(aes(color = season, shape = variable)) +
+  geom_line(aes(color = season, linetype = variable)) +
+  scale_color_manual(values = season_colors) +
+  scale_shape_manual(values = variable_shapes) +
+  scale_linetype_manual(values = variable_linetypes) +
+  scale_x_discrete(limits = month.abb) +
+  scale_x_discrete(limits = month.abb) +
+  labs(
+    title = "Monthly Averages of Temperature, O3, PM10, and Dewpoint by Season",
+    x = "Month",
+    y = "Value",
+    color = "Season",
+    shape = "Variable",
+    linetype = "Variable"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+## Print the final plot
+print(final_plot)
+```
+
+From the plot, variable *pm10* seems to have the least seasonal trend.
+
+
+## Problem 2
+```{r}
+## Define 'poly' S4 class
+##' @field coefficients A numeric vector containing the coefficients of the polynomial.
+##' @field exponents A numeric vector containing the exponents 
+##        of the polynomial corresponding to each coefficient.
+setClass("poly", 
+         slots = c(coefficients = "numeric", 
+                   exponents = "numeric"))
+```
+
+```{r}
+## Constructor for 'poly' class
+##' @param poly_string A string representing the polynomial.
+##' @return A `poly` object
+make_poly <- function(poly_string){
+  # Split the string at '+' or '-' signs, keeping the signs with the terms
+  terms <- unlist(strsplit(poly_string, 
+                           split = "(?<=\\d)\\s*(?=[+-])|(?<=x)\\s*(?=[+-])", 
+                           perl = TRUE))
+  
+  coeffs <- numeric()
+  exps <- numeric()
+
+  for (term in terms){
+    # Detect if term is negative
+    sign <- ifelse(grepl("^-", term), -1, 1)
+    term <- gsub("^[+-]\\s*", "", term) 
+
+    # Apply the sign
+    coeff <- ifelse(grepl("x", term), 1, 0) 
+    coeff <- ifelse(grepl("^\\d+", term), as.numeric(sub("x.*$", "", term)), coeff)  
+    coeff <- sign * coeff  
+
+    exp <- ifelse(grepl("x", term), 1, 0) 
+    exp <- ifelse(grepl("x\\^", term), as.numeric(sub(".*\\^", "", term)), exp)
+
+    coeffs <- c(coeffs, coeff)
+    exps <- c(exps, exp)
+  }
+  
+  new("poly", coefficients = coeffs, exponents = exps)
+}
+```
+
+```{r}
+## Validator for `poly` class
+##' @param object A `poly` object
+##' @return TRUE if the object is valid, otherwise stop with an error message
+setValidity("poly", function(object){
+  # Check if the lengths of coefficients and exponents are equal
+  if(length(object@coefficients) != length(object@exponents)) {
+    stop("Lengths of coefficients and exponents should match")
+  }
+  
+  return(TRUE)
+})
+```
+
+```{r}
+## Display 'poly' class objects
+##' @title Display a `poly` object
+##' @param object A `poly` object.
+setMethod("show", "poly", function(object){
+  # Order the terms by decreasing exponents
+  order_index <- order(object@exponents, decreasing = TRUE)
+  sorted_coeffs <- object@coefficients[order_index]
+  sorted_exps <- object@exponents[order_index]
+
+  # Combine terms with the same exponent
+  unique_exps <- unique(sorted_exps)
+  new_coeffs <- sapply(unique_exps, function(exp){
+    sum(sorted_coeffs[sorted_exps == exp])
+  })
+
+  # String representation for each term
+  terms <- mapply(function(coeff, exp){
+    if (coeff == 0){
+      return(NULL)
+    } else if (exp == 0){
+      return(as.character(coeff))
+    } else if (exp == 1){
+      return(ifelse(coeff == 1, "x", ifelse(coeff == -1, "-x", paste0(coeff, "x"))))
+    } else{
+      return(ifelse(coeff == 1, paste0("x^", exp), 
+                    ifelse(coeff == -1, paste0("-x^", exp), 
+                           paste0(coeff, "x^", exp))))
+    }
+  }, new_coeffs, unique_exps, SIMPLIFY = FALSE)
+
+  # Filter out terms with coefficient zero
+  terms <- Filter(Negate(is.null), terms)
+
+  # Construct the complete polynomial string
+  polynomial_string <- paste(terms, collapse = " ")
+  polynomial_string <- gsub(" ([^\\-])", " + \\1", polynomial_string) # 
+  polynomial_string <- gsub("-", "- ", polynomial_string)
+  cat(polynomial_string, "\n")
+  
+  return(invisible(object))
+})
+```
+
+
+```{r}
+##' @title Add two `poly` objects
+##' @param e1 The first `poly` object
+##' @param e2 The second `poly` object
+##' @return A new `poly` object representing the sum of the two inputs
+setMethod("+", signature("poly", "poly"), function(e1, e2){
+  # Extract and combine unique exponents from both polynomials
+  all_exps <- unique(c(e1@exponents, e2@exponents))
+  new_coeffs <- numeric(length(all_exps))
+  
+  # Sum coefficients of terms with the same exponent
+  for (exp in all_exps){
+    new_coeffs[which(all_exps == exp)] <- sum(e1@coefficients[e1@exponents == exp], 
+                                              e2@coefficients[e2@exponents == exp])
+  }
+
+  # Sort the terms by decreasing exponent
+  order_index <- order(all_exps, decreasing = TRUE)
+  new_coeffs <- new_coeffs[order_index]
+  all_exps <- all_exps[order_index]
+
+  new("poly", coefficients = new_coeffs, exponents = all_exps)
+})
+```
+
+```{r}
+##' @title Subtract two `poly` objects
+##' @param e1 The first `poly` object 
+##' @param e2 The second `poly` object
+##' @return A new `poly` object representing the difference of the two inputs
+setMethod("-", signature("poly", "poly"), function(e1, e2){
+  # Extract and combine unique exponents from both polynomials
+  all_exps <- unique(c(e1@exponents, e2@exponents))
+  new_coeffs <- numeric(length(all_exps))
+  
+  # Subtract coefficients of terms with the same exponent
+  for (exp in all_exps) {
+    new_coeffs[which(all_exps == exp)] <- sum(e1@coefficients[e1@exponents == exp], 
+                                              -e2@coefficients[e2@exponents == exp])
+  }
+
+  # Sort the terms by decreasing exponent
+  order_index <- order(all_exps, decreasing = TRUE)
+  new_coeffs <- new_coeffs[order_index]
+  all_exps <- all_exps[order_index]
+
+  new("poly", coefficients = new_coeffs, exponents = all_exps)
+})
+```
+
+
+```{r}
+# Test
+p1 <- make_poly("3x^2 + 2")
+p2 <- make_poly("7x^3 - 2x^2 - x + 17")
+p3 <- new("poly", coefficients=c(17, -2, 0, 17), exponents=c(3, 2, 1, 0))
+p4 <- new("poly", coefficients=c(-7, -4, 0, 7), exponents=c(3, 2, 1, 0))
+p5 <- new("poly", coefficients = c(1, -4, 3, 3), exponents = c(3, 4, 1, 1))
+p6 <- new("poly", coefficients = c(1, -4, 3), exponents = c(2, 3, 1))
+p1
+p2
+p3
+p4
+p5
+p1+p2
+p1-p2
+p3-p4
+```
+
+
+## Problem 3
+### (a)
+```{r}
+library(nycflights13)
+library(data.table)
+
+# Convert flights and airports data frames to data tables
+flights_dt <- as.data.table(flights)
+airports_dt <- as.data.table(airports)
+
+## Departure table
+# Calculate mean and median departure delay per airport
+departure_delay_dt <- flights_dt[, .(
+  mean_delay = mean(dep_delay, na.rm = TRUE),
+  median_delay = median(dep_delay, na.rm = TRUE)
+), by = .(origin)][order(-mean_delay)]
+
+# Join with airports data to get airport names
+departure_delay_dt <- departure_delay_dt[airports_dt, 
+                                         on = .(origin = faa), 
+                                         nomatch = 0][, .(name, 
+                                                          mean_delay, 
+                                                          median_delay)]
+
+# Print
+print(departure_delay_dt, nrow(departure_delay_dt))
+
+
+## Arrival table
+# Calculate mean, median delay, and flight count for each destination
+arrival_delay_dt <- flights_dt[, .(
+  mean_delay = mean(arr_delay, na.rm = TRUE),
+  med_delay = median(arr_delay, na.rm = TRUE),
+  numflights = .N
+), by = .(dest)]
+
+# Filter out destinations with under 10 flights
+arrival_delay_dt <- arrival_delay_dt[numflights >= 10]
+
+# Join with airports data to get airport names
+arrival_delay_dt <- merge(arrival_delay_dt, airports_dt, 
+                          by.x = "dest", by.y = "faa", all.x = TRUE)
+
+# Replace NA names with FAA codes
+arrival_delay_dt[, name := fcoalesce(name, dest)]
+
+# Select and arrange columns
+arrival_delay_dt <- arrival_delay_dt[, .(name, 
+                                         mean_delay, 
+                                         med_delay)][order(-mean_delay)]
+
+# Print
+print(arrival_delay_dt, nrow(arrival_delay_dt))
+```
+
+
+### (b)
+```{r}
+## Convert planes data frames to data tables
+planes_dt <- as.data.table(planes)
+
+## Join flights with planes
+fastest_model_dt <- flights_dt[planes_dt, on = .(tailnum), nomatch = 0]
+
+## Ensure air_time and distance are numeric
+fastest_model_dt[, c("air_time", "distance") := list(as.numeric(air_time), 
+                                                     as.numeric(distance))]
+
+## Calculate speed in mph
+fastest_model_dt[!is.na(time) & !is.na(distance), 
+                 mph := distance / (air_time / 60)]
+
+## Group by model and calculate average mph and flight count
+fastest_model_dt <- fastest_model_dt[, .(
+  avgmph = mean(mph, na.rm = TRUE),
+  nflights = .N
+), by = .(model)][order(-avgmph)][1]
+
+## Print the model with the fastest average speed
+print(fastest_model_dt)
+```
+
+
+
+
+
+
